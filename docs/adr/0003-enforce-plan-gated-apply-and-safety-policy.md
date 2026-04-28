@@ -6,7 +6,7 @@
 
 ## Context
 
-`dagent apply` can change remote state. Without strict safety gates, automation can apply stale or unsafe actions, or mutate resources without an auditable plan.
+`data-agent-ctl apply` can change remote state. Without strict safety gates, automation can apply stale or unsafe actions, or mutate resources without an auditable plan.
 
 ## Decision
 

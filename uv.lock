@@ -159,7 +159,7 @@ wheels = [
 ]
 
 [[package]]
-name = "dagent"
+name = "data-agent-ctl"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

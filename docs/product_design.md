@@ -12,15 +12,15 @@ The CLI should solve five jobs:
 
 The Google Data Analytics API is a good fit for this because it exposes lifecycle methods for data agents, including createSync, updateSync, deleteSync, get, list, listAccessible, plus getIamPolicy and setIamPolicy; it also exposes chat, queryData, conversation APIs, and A2A message endpoints. The service endpoint is `https://geminidataanalytics.googleapis.com`, and Google currently recommends v1beta for production integrations during the Preview period.
 
-Recommended CLI name in this design: `dagent`.
+Recommended CLI name in this design: `data-agent-ctl`.
 
 ---
 
-## Product Design: dagent — Data Agents as Code CLI
+## Product Design: data-agent-ctl — Data Agents as Code CLI
 
 ## 1. Product vision
 
-dagent is a CLI, SDK, and agent-tooling layer for managing governed data agents across Google Cloud projects and metadata systems.
+data-agent-ctl is a CLI, SDK, and agent-tooling layer for managing governed data agents across Google Cloud projects and metadata systems.
 
 It should feel like a hybrid of:
 
@@ -101,12 +101,12 @@ flowchart TD
 The key abstraction is a provider-neutral canonical object:
 
 ```yaml
-apiVersion: dagent.dev/v1alpha1
+apiVersion: data-agent-ctl.dev/v1alpha1
 kind: DataAgent
 metadata:
   name: sales-operations-agent
   labels:
-    managed_by: dagent
+    managed_by: data-agent-ctl
     source: dbt
     dbt_project: analytics
 spec:
@@ -151,7 +151,7 @@ spec:
 flowchart LR
   subgraph Sources
     DBT[dbt manifest.json]
-    YAML[dagent YAML specs]
+    YAML[data-agent-ctl YAML specs]
     DF[Future: Dataform]
     LM[Future: LookML]
   end
@@ -194,7 +194,7 @@ flowchart LR
 Top-level CLI
 
 ```text
-dagent
+data-agent-ctl
 ├── init
 ├── validate
 ├── discover
@@ -224,8 +224,8 @@ Design principles
 Principle Explanation
 Read-only commands are easy list, get, discover, ask, chat, drift detect.
 Mutating commands are explicit apply, destroy, iam set require deliberate invocation.
-Plans are first-class artifacts dagent plan --out plan.json; dagent apply plan.json.
-Drift is first-class dagent drift detect, dagent drift explain, dagent drift remediate.
+Plans are first-class artifacts data-agent-ctl plan --out plan.json; data-agent-ctl apply plan.json.
+Drift is first-class data-agent-ctl drift detect, data-agent-ctl drift explain, data-agent-ctl drift remediate.
 Multi-project is first-class Every lifecycle and drift command supports project lists, folders, and org-scoped discovery.
 Coding-agent safe mode MCP and skills expose read/plan by default, not apply/delete.
 
@@ -246,7 +246,7 @@ Runtime identity drift Declared service account differs from remote agent config
 Data-plane access drift Runtime service account no longer has access to required BigQuery datasets/tables.
 Ownership drift Remote labels/annotations no longer identify the dbt exposure or environment.
 Policy drift Agent uses forbidden data tags, missing owner, public IAM, or restricted tables.
-Orphan drift Remote data agent is still managed by dagent, but its source dbt Exposure was removed.
+Orphan drift Remote data agent is still managed by data-agent-ctl, but its source dbt Exposure was removed.
 Location/project drift Agent exists in the wrong project or location.
 
 ---
@@ -254,7 +254,7 @@ Location/project drift Agent exists in the wrong project or location.
 ### 7.2 Drift commands
 
 ```text
-dagent drift
+data-agent-ctl drift
 ├── detect
 ├── explain
 ├── remediate
@@ -264,12 +264,12 @@ dagent drift
 └── report
 ```
 
-dagent drift detect
+data-agent-ctl drift detect
 
 Detect drift without making changes.
 
 ```shell
-dagent drift detect \
+data-agent-ctl drift detect \
   --source dbt \
   --manifest target/manifest.json \
   --projects analytics-dev,analytics-stg,analytics-prod \
@@ -280,7 +280,7 @@ dagent drift detect \
 Multi-project via file:
 
 ```shell
-dagent drift detect \
+data-agent-ctl drift detect \
   --source dbt \
   --manifest target/manifest.json \
   --project-file projects/prod-projects.txt \
@@ -290,18 +290,18 @@ dagent drift detect \
 Future org/folder support:
 
 ```shell
-dagent drift detect \
+data-agent-ctl drift detect \
   --folder 1234567890 \
   --project-filter labels.env=prod \
   --location global
 ```
 
-dagent drift explain
+data-agent-ctl drift explain
 
 Explain one drift finding.
 
 ```shell
-dagent drift explain \
+data-agent-ctl drift explain \
   projects/analytics-prod/locations/global/dataAgents/sales-operations-agent
 ```
 
@@ -320,33 +320,33 @@ Remote:
 Risk:
   Remote instruction expands the allowed data surface beyond governed sources.
 Suggested remediation:
-  dagent apply target/dagent.plan.json --target sales-operations-agent
+  data-agent-ctl apply target/data-agent-ctl.plan.json --target sales-operations-agent
 ```
 
-dagent drift remediate
+data-agent-ctl drift remediate
 
 Generate and optionally apply a remediation plan.
 
 ```shell
-dagent drift remediate \
+data-agent-ctl drift remediate \
   --source dbt \
   --manifest target/manifest.json \
   --projects analytics-prod \
-  --out target/dagent-drift-remediation.plan.json
+  --out target/data-agent-ctl-drift-remediation.plan.json
 ```
 
 Then:
 
 ```shell
-dagent apply target/dagent-drift-remediation.plan.json
+data-agent-ctl apply target/data-agent-ctl-drift-remediation.plan.json
 ```
 
-dagent drift report
+data-agent-ctl drift report
 
 Produce compliance-friendly output.
 
 ```shell
-dagent drift report \
+data-agent-ctl drift report \
   --source dbt \
   --manifest target/manifest.json \
   --projects analytics-prod \
@@ -421,7 +421,7 @@ Matching keys:
 1. full resource name
 2. project + location + data_agent_id
 3. labels:
-   - managed_by=dagent
+   - managed_by=data-agent-ctl
    - source=dbt
    - dbt_unique_id=exposure.project.name
    - environment=prod
@@ -455,38 +455,38 @@ Public access found Fail immediately; optional emergency removal command.
 
 ### 8.1 Main lifecycle commands
 
-dagent validate
+data-agent-ctl validate
 
 ```shell
-dagent validate \
+data-agent-ctl validate \
   --source dbt \
   --manifest target/manifest.json \
   --run-results target/run_results.json \
-  --policy policies/dagent-prod.yaml
+  --policy policies/data-agent-ctl-prod.yaml
 ```
 
-dagent plan
+data-agent-ctl plan
 
 ```shell
-dagent plan \
+data-agent-ctl plan \
   --source dbt \
   --manifest target/manifest.json \
   --run-results target/run_results.json \
   --projects analytics-prod \
   --location global \
-  --out target/dagent.plan.json
+  --out target/data-agent-ctl.plan.json
 ```
 
-dagent apply
+data-agent-ctl apply
 
 ```shell
-dagent apply target/dagent.plan.json
+data-agent-ctl apply target/data-agent-ctl.plan.json
 ```
 
-dagent destroy
+data-agent-ctl destroy
 
 ```shell
-dagent destroy \
+data-agent-ctl destroy \
   --target sales-operations-agent \
   --project analytics-prod \
   --location global \
@@ -522,7 +522,7 @@ Plan files should be immutable, reviewable, and signed/hashable.
 
 ```json
 {
-  "apiVersion": "dagent.dev/v1alpha1",
+  "apiVersion": "data-agent-ctl.dev/v1alpha1",
   "kind": "Plan",
   "created_at": "2026-04-28T10:00:00Z",
   "provider": {
@@ -555,7 +555,7 @@ Plan files should be immutable, reviewable, and signed/hashable.
 }
 ```
 
-dagent apply should verify that:
+data-agent-ctl apply should verify that:
 
 1. the plan version is supported,
 2. the source artifact hash still matches unless --allow-stale-plan,
@@ -591,7 +591,7 @@ exposures:
   - sales
   - governed
     meta:
-      dagent:
+      data-agent-ctl:
         enabled: true
         provider: google-gemini-data-analytics
         project_id: analytics-prod
@@ -615,7 +615,7 @@ exposures:
                 - group:analytics-eng@example.com
 ```
 
-Use meta.dagent rather than meta.data_agent so the metadata is owned by the CLI and can support multiple providers later.
+Use meta.data-agent-ctl rather than meta.data_agent so the metadata is owned by the CLI and can support multiple providers later.
 
 ---
 
@@ -653,11 +653,11 @@ Failed build/test Fail in prod if require_success=true.
 Support all of the following:
 
 ```shell
-dagent list --project analytics-prod
-dagent list --projects analytics-dev,analytics-stg,analytics-prod
-dagent list --project-file projects.txt
-dagent list --folder 1234567890
-dagent list --organization 9876543210
+data-agent-ctl list --project analytics-prod
+data-agent-ctl list --projects analytics-dev,analytics-stg,analytics-prod
+data-agent-ctl list --project-file projects.txt
+data-agent-ctl list --folder 1234567890
+data-agent-ctl list --organization 9876543210
 ```
 
 For v1, project-file and explicit projects are sufficient. Folder/org discovery can be implemented later using Cloud Resource Manager APIs.
@@ -669,7 +669,7 @@ For v1, project-file and explicit projects are sufficient. Folder/org discovery 
 Find all data agents in Google projects.
 
 ```shell
-dagent discover \
+data-agent-ctl discover \
   --projects analytics-dev,analytics-stg,analytics-prod \
   --location global \
   --format table
@@ -679,8 +679,8 @@ Example output:
 
 ```text
 PROJECT          LOCATION  AGENT_ID                  MANAGED_BY  DRIFT
-analytics-prod   global    sales-operations-agent    dagent      clean
-analytics-prod   global    revenue-exec-agent        dagent      drifted
+analytics-prod   global    sales-operations-agent    data-agent-ctl      clean
+analytics-prod   global    revenue-exec-agent        data-agent-ctl      drifted
 analytics-prod   global    manual-test-agent         unknown     unmanaged
 ```
 
@@ -691,8 +691,8 @@ analytics-prod   global    manual-test-agent         unknown     unmanaged
 Two different use cases:
 
 Command API Use
-dagent list dataAgents.list Inventory for operators with project-level permission.
-dagent list-accessible dataAgents.listAccessible Runtime discovery for users/coding agents.
+data-agent-ctl list dataAgents.list Inventory for operators with project-level permission.
+data-agent-ctl list-accessible dataAgents.listAccessible Runtime discovery for users/coding agents.
 
 Google exposes both list and listAccessible methods for v1beta.projects.locations.dataAgents.
 
@@ -774,7 +774,7 @@ Default behavior: fail plan unless policy explicitly allows public access, which
 The CLI should not default to granting BigQuery access, but it should detect missing access.
 
 ```shell
-dagent validate access \
+data-agent-ctl validate access \
   --source dbt \
   --manifest target/manifest.json \
   --project analytics-prod
@@ -796,7 +796,7 @@ sales-operations-agent:
 Optional command:
 
 ```shell
-dagent access suggest-terraform \
+data-agent-ctl access suggest-terraform \
   --manifest target/manifest.json \
   --out generated/data_agent_access.tf
 ```
@@ -808,7 +808,7 @@ dagent access suggest-terraform \
 ### 12.1 One-shot ask
 
 ```shell
-dagent ask sales-operations-agent \
+data-agent-ctl ask sales-operations-agent \
   "What were the top drivers of revenue variance last month?" \
   --project analytics-prod \
   --location global \
@@ -818,7 +818,7 @@ dagent ask sales-operations-agent \
 ### 12.2 Interactive chat
 
 ```shell
-dagent chat sales-operations-agent \
+data-agent-ctl chat sales-operations-agent \
   --project analytics-prod \
   --location global
 ```
@@ -826,7 +826,7 @@ dagent chat sales-operations-agent \
 ### 12.3 Query data
 
 ```shell
-dagent query \
+data-agent-ctl query \
   --project analytics-prod \
   --location global \
   --question "Show revenue by product category for Q1."
@@ -835,8 +835,8 @@ dagent query \
 ### 12.4 Conversations
 
 ```shell
-dagent conversation create --agent sales-operations-agent
-dagent conversation messages conversations/abc123
+data-agent-ctl conversation create --agent sales-operations-agent
+data-agent-ctl conversation messages conversations/abc123
 ```
 
 Google’s API supports chat, queryData, conversation creation/listing/deletion, and listing conversation messages.
@@ -848,9 +848,9 @@ Google’s API supports chat, queryData, conversation creation/listing/deletion,
 The CLI should expose A2A commands because Google’s API exposes A2A card, send, and stream methods for data agents.
 
 ```shell
-dagent a2a card sales-operations-agent
-dagent a2a send sales-operations-agent "Summarize revenue anomalies this month."
-dagent a2a stream sales-operations-agent "Analyze pipeline risk."
+data-agent-ctl a2a card sales-operations-agent
+data-agent-ctl a2a send sales-operations-agent "Summarize revenue anomalies this month."
+data-agent-ctl a2a stream sales-operations-agent "Analyze pipeline risk."
 ```
 
 Use cases:
@@ -867,8 +867,8 @@ a2a stream Long-running streaming agent task.
 ### 14.1 Repository layout
 
 ```text
-dagent/
-├── src/dagent/
+data-agent-ctl/
+├── src/data_agent_ctl/
 ├── skills/
 │   ├── claude-code/
 │   │   ├── SKILL.md
@@ -891,11 +891,11 @@ dagent/
 ### 14.2 Skill commands
 
 ```shell
-dagent skills list
-dagent skills install cursor
-dagent skills install claude-code
-dagent skills render generic --out AGENTS.md
-dagent skills doctor
+data-agent-ctl skills list
+data-agent-ctl skills install cursor
+data-agent-ctl skills install claude-code
+data-agent-ctl skills render generic --out AGENTS.md
+data-agent-ctl skills doctor
 ```
 
 ### 14.3 Cursor rules example
@@ -905,28 +905,28 @@ dagent skills doctor
 
 When the user asks analytics questions:
 
-1. Run `dagent list-accessible --format json`.
+1. Run `data-agent-ctl list-accessible --format json`.
 2. Choose the most relevant data agent.
-3. Run `dagent ask <agent-id> "<question>" --format markdown`.
+3. Run `data-agent-ctl ask <agent-id> "<question>" --format markdown`.
 4. Do not query raw BigQuery tables directly if a governed data agent exists.
 For lifecycle changes:
 5. Edit dbt Exposures.
 6. Run `dbt parse`.
-7. Run `dagent validate`.
-8. Run `dagent plan`.
+7. Run `data-agent-ctl validate`.
+8. Run `data-agent-ctl plan`.
 9. Show the plan before applying.
 Never run:
 
-- `dagent apply`
-- `dagent destroy`
-- `dagent iam set`
+- `data-agent-ctl apply`
+- `data-agent-ctl destroy`
+- `data-agent-ctl iam set`
 unless the user explicitly asks.
 ```
 
 ### 14.4 MCP server mode
 
 ```shell
-dagent mcp serve
+data-agent-ctl mcp serve
 ```
 
 Default MCP tools:
@@ -945,14 +945,14 @@ set_data_agent_iam Yes No
 Enable mutating tools only with:
 
 ```shell
-dagent mcp serve --enable-mutating-tools
+data-agent-ctl mcp serve --enable-mutating-tools
 ```
 
 ---
 
 1. Configuration design
 
-### 15.1 dagent.yaml
+### 15.1 data-agent-ctl.yaml
 
 ```yaml
 version: 1
@@ -967,7 +967,7 @@ sources:
     run_results: target/run_results.json
 ownership:
   managed_by_label: managed_by
-  managed_by_value: dagent
+  managed_by_value: data-agent-ctl
   environment_label: environment
 defaults:
   delete_mode: disable
@@ -980,7 +980,7 @@ projects:
 - analytics-stg
 - analytics-prod
 policy:
-  file: policies/dagent-prod.yaml
+  file: policies/data-agent-ctl-prod.yaml
 ```
 
 ### 15.2 Policy file
@@ -1192,28 +1192,28 @@ BigQuery IAM auto-grant Disabled
 
 ```shell
 dbt parse
-dagent validate --source dbt --manifest target/manifest.json
-dagent plan \
+data-agent-ctl validate --source dbt --manifest target/manifest.json
+data-agent-ctl plan \
   --source dbt \
   --manifest target/manifest.json \
   --projects analytics-dev \
-  --out target/dagent.plan.json
-dagent drift detect \
+  --out target/data-agent-ctl.plan.json
+data-agent-ctl drift detect \
   --source dbt \
   --manifest target/manifest.json \
   --projects analytics-dev \
   --format sarif \
-  --out target/dagent-drift.sarif
+  --out target/data-agent-ctl-drift.sarif
 ```
 
 ### 20.2 Production deployment
 
 ```shell
 dbt build
-dagent validate --source dbt --manifest target/manifest.json --run-results target/run_results.json
-dagent plan --source dbt --manifest target/manifest.json --run-results target/run_results.json --projects analytics-prod --out target/dagent.plan.json
-dagent apply target/dagent.plan.json
-dagent drift detect --source dbt --manifest target/manifest.json --projects analytics-prod --fail-on high
+data-agent-ctl validate --source dbt --manifest target/manifest.json --run-results target/run_results.json
+data-agent-ctl plan --source dbt --manifest target/manifest.json --run-results target/run_results.json --projects analytics-prod --out target/data-agent-ctl.plan.json
+data-agent-ctl apply target/data-agent-ctl.plan.json
+data-agent-ctl drift detect --source dbt --manifest target/manifest.json --projects analytics-prod --fail-on high
 ```
 
 ---
@@ -1225,7 +1225,7 @@ dagent drift detect --source dbt --manifest target/manifest.json --projects anal
 Support structured logs:
 
 ```shell
-dagent apply target/dagent.plan.json --log-format json
+data-agent-ctl apply target/data-agent-ctl.plan.json --log-format json
 ```
 
 Example:
@@ -1244,18 +1244,18 @@ Example:
 Optional OpenTelemetry metrics:
 
 Metric Meaning
-dagent_agents_desired Number of desired agents.
-dagent_agents_remote Number of remote agents.
-dagent_drift_findings Count by severity/type.
-dagent_apply_actions Count by action.
-dagent_api_errors Count by API method/status.
-dagent_iam_drift Count of IAM drift findings.
+data-agent-ctl_agents_desired Number of desired agents.
+data-agent-ctl_agents_remote Number of remote agents.
+data-agent-ctl_drift_findings Count by severity/type.
+data-agent-ctl_apply_actions Count by action.
+data-agent-ctl_api_errors Count by API method/status.
+data-agent-ctl_iam_drift Count of IAM drift findings.
 
 ### 21.3 Reports
 
 ```shell
-dagent drift report --format html --out reports/dagent.html
-dagent inventory export --format csv --out reports/data-agents.csv
+data-agent-ctl drift report --format html --out reports/data-agent-ctl.html
+data-agent-ctl inventory export --format csv --out reports/data-agents.csv
 ```
 
 ---
@@ -1278,7 +1278,7 @@ Exit code Meaning
 ## 1. Repository structure
 
 ```text
-dagent/
+data-agent-ctl/
 ├── pyproject.toml
 ├── README.md
 ├── docs/
@@ -1289,7 +1289,7 @@ dagent/
 │   ├── mcp.md
 │   └── skills.md
 ├── src/
-│   └── dagent/
+│   └── data-agent-ctl/
 │       ├── cli.py
 │       ├── config.py
 │       ├── models.py
@@ -1346,8 +1346,8 @@ Phase 0 — Spike
 Deliverable Description
 Google API client List/get/create/update/delete data agents.
 Minimal YAML spec Create one agent from local YAML.
-dagent ask Ask a saved agent a question.
-dagent list List project agents.
+data-agent-ctl ask Ask a saved agent a question.
+data-agent-ctl list List project agents.
 
 Phase 1 — MVP lifecycle
 
@@ -1416,8 +1416,8 @@ Question Proposed answer
 Should the CLI create service accounts? No by default; Terraform should manage them. Optional dev-only --allow-service-account-create.
 Should the CLI auto-grant BigQuery access? No by default; validate and suggest Terraform.
 Should drift remediation auto-apply? No; generate plan first.
-Should unmanaged remote agents be imported or ignored? Report as unmanaged; offer dagent import.
-Should dagent ask require source metadata? No; runtime usage should work with remote agent ID alone.
+Should unmanaged remote agents be imported or ignored? Report as unmanaged; offer data-agent-ctl import.
+Should data-agent-ctl ask require source metadata? No; runtime usage should work with remote agent ID alone.
 Should mutating MCP tools exist? Yes, but disabled by default.
 Should conversations be managed as lifecycle resources? No; treat as runtime state.
 
@@ -1432,15 +1432,15 @@ dbt build
 
 # 2. Validate data-agent exposures
 
-dagent validate \
+data-agent-ctl validate \
   --source dbt \
   --manifest target/manifest.json \
   --run-results target/run_results.json \
-  --policy policies/dagent-prod.yaml
+  --policy policies/data-agent-ctl-prod.yaml
 
 # 3. Detect drift across projects
 
-dagent drift detect \
+data-agent-ctl drift detect \
   --source dbt \
   --manifest target/manifest.json \
   --projects analytics-dev,analytics-stg,analytics-prod \
@@ -1449,20 +1449,20 @@ dagent drift detect \
 
 # 4. Generate deployment plan
 
-dagent plan \
+data-agent-ctl plan \
   --source dbt \
   --manifest target/manifest.json \
   --run-results target/run_results.json \
   --projects analytics-prod \
-  --out target/dagent.plan.json
+  --out target/data-agent-ctl.plan.json
 
 # 5. Apply reviewed plan
 
-dagent apply target/dagent.plan.json
+data-agent-ctl apply target/data-agent-ctl.plan.json
 
 # 6. Ask an agent a question
 
-dagent ask sales-operations-agent \
+data-agent-ctl ask sales-operations-agent \
   "What changed in sales pipeline risk this week?" \
   --project analytics-prod \
   --location global \
@@ -1470,34 +1470,34 @@ dagent ask sales-operations-agent \
 
 # 7. Install coding-agent instructions
 
-dagent skills install cursor
-dagent skills install claude-code
+data-agent-ctl skills install cursor
+data-agent-ctl skills install claude-code
 ```
 
 ---
 
 Final recommendation
 
-Build dagent as a generic data-agent lifecycle and runtime CLI with these first-class capabilities:
+Build data-agent-ctl as a generic data-agent lifecycle and runtime CLI with these first-class capabilities:
 
 ```text
-dagent validate
-dagent plan
-dagent apply
-dagent drift detect
-dagent drift explain
-dagent drift remediate
-dagent list
-dagent list-accessible
-dagent get
-dagent iam get/set
-dagent ask
-dagent chat
-dagent a2a card/send/stream
-dagent skills install
-dagent mcp serve
+data-agent-ctl validate
+data-agent-ctl plan
+data-agent-ctl apply
+data-agent-ctl drift detect
+data-agent-ctl drift explain
+data-agent-ctl drift remediate
+data-agent-ctl list
+data-agent-ctl list-accessible
+data-agent-ctl get
+data-agent-ctl iam get/set
+data-agent-ctl ask
+data-agent-ctl chat
+data-agent-ctl a2a card/send/stream
+data-agent-ctl skills install
+data-agent-ctl mcp serve
 ```
 
 The differentiator should be drift management across Google projects plus agent-friendly runtime usage. That combination makes the tool valuable for platform teams, analytics engineers, governance teams, and coding agents.
 
-Three immediate next actions: define the canonical DataAgentSpec and drift-finding schemas, implement dagent drift detect for config/IAM drift against one project, then add dbt Exposure parsing to generate desired specs from manifest.json.
+Three immediate next actions: define the canonical DataAgentSpec and drift-finding schemas, implement data-agent-ctl drift detect for config/IAM drift against one project, then add dbt Exposure parsing to generate desired specs from manifest.json.

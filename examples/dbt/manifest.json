@@ -12,7 +12,7 @@
         "nodes": ["model.analytics.fact_sales"]
       },
       "meta": {
-        "dagent": {
+        "data-agent-ctl": {
           "project_id": "analytics-dev",
           "location": "global",
           "instructions": "Answer governed sales operations questions."

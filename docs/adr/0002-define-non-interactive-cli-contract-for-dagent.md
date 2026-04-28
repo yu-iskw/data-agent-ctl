@@ -1,4 +1,4 @@
-# ADR 0002: Define non-interactive CLI contract for dagent
+# ADR 0002: Define non-interactive CLI contract for data-agent-ctl
 
 - **Status:** Accepted
 - **Date:** 2026-04-28
@@ -6,12 +6,12 @@
 
 ## Context
 
-`dagent` is intended to be run by both humans and coding agents in CI/CD and local automation.
+`data-agent-ctl` is intended to be run by both humans and coding agents in CI/CD and local automation.
 Interactive prompts or ambiguous CLI behavior would make the tool unreliable for automated workflows and increase failure rates in pipelines.
 
 ## Decision
 
-`dagent` commands MUST be agent-friendly and non-interactive by default:
+`data-agent-ctl` commands MUST be agent-friendly and non-interactive by default:
 
 - All required inputs are explicit flags or arguments.
 - Subcommands expose localized help (`--help`) with concrete examples.
