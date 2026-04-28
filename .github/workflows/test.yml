@@ -5,7 +5,7 @@ on:
     paths:
       - .github/workflows/test.yml
       - pyproject.toml
-      - src/your_package/**/*.py
+      - src/data_agent_ctl/**/*.py
       - pylintrc
   push:
     branches:
@@ -22,7 +22,7 @@ jobs:
       run:
         shell: bash
     env:
-      PYTHON_PACKAGE_NAME: YOUR_PYTHON_PACKAGE_NAME
+      PYTHON_PACKAGE_NAME: data-agent-ctl
     steps:
       - uses: actions/checkout@v6
       - name: Set up Python
@@ -38,6 +38,12 @@ jobs:
       - name: Run tests
         run: |
           uv run bash dev/test_python.sh
+      - name: Dagent CLI contract smoke checks
+        run: |
+          uv run data-agent-ctl validate --source dbt --manifest examples/dbt/manifest.json --project analytics-dev --location global
+          uv run data-agent-ctl plan --source dbt --manifest examples/dbt/manifest.json --projects analytics-dev --location global --out target/data-agent-ctl.plan.json
+          uv run data-agent-ctl drift detect --source dbt --manifest examples/dbt/manifest.json --projects analytics-dev --location global --format json
+          uv run data-agent-ctl drift report --source dbt --manifest examples/dbt/manifest.json --projects analytics-dev --location global --format html --out reports/data-agent-ctl.html
       - name: Test build
         run: |
           uv run bash dev/build.sh

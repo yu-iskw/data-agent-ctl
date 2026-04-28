@@ -37,7 +37,7 @@ make clean        # Clean build artifacts
 
 ## Testing
 
-- Tests live under `src/your_package/tests/` (colocated with the package)
+- Tests live under `src/data_agent_ctl/tests/` (colocated with the package)
 - Test files must match `test_*.py`
 - Run `make test` before commits
 - Aim for meaningful coverage on critical paths
@@ -71,7 +71,7 @@ make clean        # Clean build artifacts
 
 ## Architecture
 
-- Package source: `src/your_package/` (rename when initializing a real project)
+- Package source: `src/data_agent_ctl/`
 - Dev scripts: `dev/`
 - CI/CD: `.github/workflows/`
 - **Claude Code** automation: [`.claude/`](.claude/) — see [CLAUDE.md](CLAUDE.md) for how Claude loads this repo and the directory layout
