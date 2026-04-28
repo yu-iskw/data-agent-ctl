@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "dbt_version": "1.8.0"
+  },
+  "exposures": {
+    "exposure.analytics.sales_operations": {
+      "name": "sales-operations-agent",
+      "label": "Sales Operations Agent",
+      "description": "Answer sales operations questions.",
+      "tags": ["sales", "operations"],
+      "depends_on": {
+        "nodes": ["model.analytics.fact_sales"]
+      },
+      "meta": {
+        "dagent": {
+          "project_id": "analytics-dev",
+          "location": "global",
+          "instructions": "Answer governed sales operations questions."
+        },
+        "labels": {
+          "team": "analytics"
+        }
+      }
+    }
+  }
+}

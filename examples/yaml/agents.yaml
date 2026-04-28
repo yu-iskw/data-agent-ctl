@@ -1,0 +1,16 @@
+data_agents:
+  - name: sales-operations-agent
+    project_id: analytics-dev
+    location: global
+    instructions: |
+      Answer sales operations questions using governed metrics.
+    labels:
+      team: analytics
+    tags:
+      - sales
+      - operations
+    iam_mode: member_additive
+    iam_bindings:
+      - role: roles/dataViewer
+        members:
+          - group:analytics@example.com
